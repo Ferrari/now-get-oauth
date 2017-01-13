@@ -7,21 +7,25 @@ const micro = require('micro')
 const typer = require('media-typer')
 const rawBody = require('raw-body')
 const got = require('got')
+const uuidV1 = require('uuid/v1')
+const Cookies = require('cookies')
+const ejs = require('ejs')
 const debug = require('debug')('get-dev-oauth')
 
 const OAUTH_REQ = process.env.OAUTH_REQ || 'https://getpocket.com/v3/oauth/request'
 const OAUTH_AUTH = process.env.OAUTH_AUTH || 'https://getpocket.com/v3/oauth/authorize'
 const REDIRECT = process.env.REDIRECT || 'https://getpocket.com/auth/authorize'
-const COMSUMER_KEY = process.env.COMSUMER_KEY || '62472-b2317094c3988dd3fe9aba62'
 const ENDPOINT = `${process.env.ENDPOINT}/oauth/callback` || ''
 const LIMIT = process.env.LIMIT || '1mb'
 
-const prepareView = (tmplPath) => {
+let simpleStorage = new Map()
+
+const prepareView = (tmplPath, tmplData = {}) => {
   let viewContent = false
   const viewPath = path.normalize(path.join(__dirname, tmplPath))
 
   try {
-    viewContent = fs.readFileSync(viewPath, 'utf8')
+    viewContent = ejs.render(fs.readFileSync(viewPath, 'utf8'), tmplData)
   } catch (err) {
     throw err
   }
@@ -41,24 +45,27 @@ async function _parseUrlEncoded (req) {
 }
 
 module.exports = async function (req, res) {
+  const cookies = new Cookies(req, res)
   const method = String(req.method).toUpperCase()
   const { pathname } = url.parse(req.url, true)
-  let reqCode = ''
 
   if (method === 'GET' &&
       pathname === '/oauth/callback') {
     // Receive callback from service vendor
     // let oauthBody = await _parseUrlEncoded(req)
-    console.log(req.url, '!!!')
+    let identity = cookies.get('now-get-oauth-session')
+    let oauthData = qs.parse(simpleStorage.get(identity))
+    console.log('ident', identity, oauthData)
     let tokenData = await got.post(OAUTH_AUTH, {
       body: {
-        consumer_key: COMSUMER_KEY,
-        code: reqCode
+        consumer_key: oauthData.consumer,
+        code: oauthData.code
       }
     })
-    console.log("!!@@")
-    console.log('token', url.parse(tokenData.body))
-    micro.send(res, 200, prepareView('/views/token.html'))
+
+    let accessTokenData = qs.parse(tokenData.body)
+    console.log('step3 %o', accessTokenData)
+    micro.send(res, 200, prepareView('/views/token.html', { accessToken: accessTokenData.access_token }))
   } else if (method === 'POST' &&
              pathname === '/oauth/request') {
     // Get comsumer key from user and start authentication process
@@ -72,14 +79,16 @@ module.exports = async function (req, res) {
       }
     })
     let reqContent = qs.parse(reqData.body, true)
-    reqCode = reqContent.code
+
+    const uniqueId = uuidV1()
+    cookies.set('now-get-oauth-session', uniqueId)
+    simpleStorage.set(uniqueId, qs.stringify({ consumer: bodyContent.key, code: reqContent.code }))
+
     res.writeHead(302, {
       'Location': `${REDIRECT}?request_token=${reqContent.code}&redirect_uri=${ENDPOINT}`
     })
     res.end()
   } else {
-    return (req.session)
-      ? micro.send(res, 200, prepareView('/views/index.html'))
-      : micro.send(res, 400, 'OAuth authentication requires session support')
+    micro.send(res, 200, prepareView('/views/index.html'))
   }
 }

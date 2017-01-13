@@ -12,10 +12,13 @@
   ],
   "author": "Ferrari Lee <shiyung@gmail.com>",
   "dependencies": {
+    "cookies": "^0.6.2",
+    "ejs": "^2.5.5",
     "got": "^6.7.1",
     "media-typer": "^0.3.0",
     "micro": "^6.1.0",
-    "raw-body": "^2.2.0"
+    "raw-body": "^2.2.0",
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "standard": "^8.6.0"
