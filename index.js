@@ -15,7 +15,7 @@ const debug = require('debug')('get-dev-oauth')
 const OAUTH_REQ = process.env.OAUTH_REQ || 'https://getpocket.com/v3/oauth/request'
 const OAUTH_AUTH = process.env.OAUTH_AUTH || 'https://getpocket.com/v3/oauth/authorize'
 const REDIRECT = process.env.REDIRECT || 'https://getpocket.com/auth/authorize'
-const ENDPOINT = `${process.env.ENDPOINT}/oauth/callback` || ''
+// const ENDPOINT = `${process.env.ENDPOINT}/oauth/callback` || ''
 const LIMIT = process.env.LIMIT || '1mb'
 
 let simpleStorage = new Map()
@@ -72,10 +72,11 @@ module.exports = async function (req, res) {
     // let input = await micro.json(req)
 
     let bodyContent = await _parseUrlEncoded(req)
+    const CALLBACK = `https://${req.headers.host}/oauth/callback`
     let reqData = await got.post(OAUTH_REQ, {
       body: {
         consumer_key: bodyContent.key,
-        redirect_uri: ENDPOINT
+        redirect_uri: CALLBACK
       }
     })
     let reqContent = qs.parse(reqData.body, true)
@@ -85,7 +86,7 @@ module.exports = async function (req, res) {
     simpleStorage.set(uniqueId, qs.stringify({ consumer: bodyContent.key, code: reqContent.code }))
 
     res.writeHead(302, {
-      'Location': `${REDIRECT}?request_token=${reqContent.code}&redirect_uri=${ENDPOINT}`
+      'Location': `${REDIRECT}?request_token=${reqContent.code}&redirect_uri=${CALLBACK}`
     })
     res.end()
   } else {
