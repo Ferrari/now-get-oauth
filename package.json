@@ -1,0 +1,23 @@
+{
+  "name": "now-get-oauth",
+  "version": "1.0.0",
+  "description": "Personal use only, get access token for develop easily",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "micro"
+  },
+  "keywords": [
+    "dev"
+  ],
+  "author": "Ferrari Lee <shiyung@gmail.com>",
+  "dependencies": {
+    "got": "^6.7.1",
+    "media-typer": "^0.3.0",
+    "micro": "^6.1.0",
+    "raw-body": "^2.2.0"
+  },
+  "devDependencies": {
+    "standard": "^8.6.0"
+  }
+}
