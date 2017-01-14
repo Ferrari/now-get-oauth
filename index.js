@@ -11,7 +11,7 @@ const got = require('got')
 const uuidV1 = require('uuid/v1')
 const Cookies = require('cookies')
 const ejs = require('ejs')
-const debug = require('debug')('get-dev-oauth')
+const debug = require('debug')('now-get-oauth')
 
 const OAUTH_REQ = process.env.OAUTH_REQ || 'https://getpocket.com/v3/oauth/request'
 const OAUTH_AUTH = process.env.OAUTH_AUTH || 'https://getpocket.com/v3/oauth/authorize'
@@ -75,12 +75,17 @@ module.exports = async function (req, res) {
     let bodyContent = await _parseUrlEncoded(req)
     const CALLBACK = `https://${req.headers.host}/oauth/callback`
     debug('/oauth/callback %o %s', bodyContent, CALLBACK)
-    let reqData = await got.post(OAUTH_REQ, {
-      body: {
-        consumer_key: bodyContent.key,
-        redirect_uri: CALLBACK
-      }
-    })
+    let reqData
+    try {
+      reqData = await got.post(OAUTH_REQ, {
+        body: {
+          consumer_key: bodyContent.key,
+          redirect_uri: CALLBACK
+        }
+      })
+    } catch (e) {
+      console.error(e)
+    }
     let reqContent = qs.parse(reqData.body, true)
 
     const uniqueId = uuidV1()
