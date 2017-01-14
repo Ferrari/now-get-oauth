@@ -1,3 +1,4 @@
+require('now-logs')('24aa2820-da0d-11e6-a899-2d87d2b70fe9')
 const path = require('path')
 const url = require('url')
 const fs = require('fs')
@@ -73,6 +74,7 @@ module.exports = async function (req, res) {
 
     let bodyContent = await _parseUrlEncoded(req)
     const CALLBACK = `https://${req.headers.host}/oauth/callback`
+    debug('/oauth/callback %o %s', bodyContent, CALLBACK)
     let reqData = await got.post(OAUTH_REQ, {
       body: {
         consumer_key: bodyContent.key,
@@ -84,6 +86,7 @@ module.exports = async function (req, res) {
     const uniqueId = uuidV1()
     cookies.set('now-get-oauth-session', uniqueId)
     simpleStorage.set(uniqueId, qs.stringify({ consumer: bodyContent.key, code: reqContent.code }))
+    debug('OAuthCode %o %s', reqContent, uniqueId)
 
     res.writeHead(302, {
       'Location': `${REDIRECT}?request_token=${reqContent.code}&redirect_uri=${CALLBACK}`
