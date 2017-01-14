@@ -4,7 +4,7 @@ Sometimes you want to develop but need pass service OAuth to get its access toke
 
 ## HowTo 
 
-Use [`now`](https://zeit.co/now) to deploy this app, that's it!
+Use [`now`](https://zeit.co/now) to deploy this app, that's it! You can use [now-logs](https://logs.now.sh/) if you need logging messages.
 
 ## Changelog
 
