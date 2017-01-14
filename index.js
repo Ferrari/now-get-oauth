@@ -16,7 +16,6 @@ const debug = require('debug')('now-get-oauth')
 const OAUTH_REQ = process.env.OAUTH_REQ || 'https://getpocket.com/v3/oauth/request'
 const OAUTH_AUTH = process.env.OAUTH_AUTH || 'https://getpocket.com/v3/oauth/authorize'
 const REDIRECT = process.env.REDIRECT || 'https://getpocket.com/auth/authorize'
-// const ENDPOINT = `${process.env.ENDPOINT}/oauth/callback` || ''
 const LIMIT = process.env.LIMIT || '1mb'
 
 let simpleStorage = new Map()
