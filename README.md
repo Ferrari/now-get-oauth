@@ -1,6 +1,6 @@
 ## now-get-oauth
 
-Sometimes you want to develop but need pass service OAuth to get its access token. It's a easy app for you to make it easily.
+Sometimes you want pass OAuth to get its access token for development. It's a simple app for you to make it easily.
 
 ## HowTo 
 
